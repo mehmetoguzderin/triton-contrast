@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python (pinned)
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Sync tooling deps (no GPU group)
+        run: uv sync --no-default-groups --group lint --group type --group test --no-install-project
+
+      - name: Ruff (lint)
+        run: uv run --no-default-groups --group lint ruff check .
+
+      - name: Ruff (format check)
+        run: uv run --no-default-groups --group lint ruff format --check .
+
+      - name: Pyright
+        run: uv run --no-default-groups --group type pyright
+
+      - name: Pytest
+        run: uv run --no-default-groups --group test pytest

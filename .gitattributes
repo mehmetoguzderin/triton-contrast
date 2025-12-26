@@ -1,0 +1,12 @@
+* text=auto eolf=lf
+
+*.sh   text eol=lf
+*.py   text eol=lf
+*.js   text eol=lf
+*.bat  text eol=crlf
+
+# Treat AsciiDoc as text for diffs
+*.adoc text eol=lf
+
+# Safer diffs for Python
+*.py text diff=python

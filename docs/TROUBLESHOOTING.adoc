@@ -1,0 +1,31 @@
+= Troubleshooting
+:toc:
+
+== Devcontainer has no GPU
+
+* Verify the host has NVIDIA driver + NVIDIA Container Toolkit installed.
+* Confirm Docker can see GPUs:
++
+[source,bash]
+----
+docker run --rm --gpus all nvidia/cuda:12.6.3-base-ubuntu24.04 nvidia-smi
+----
+
+== Torch sees no CUDA
+
+Inside the environment:
+
+[source,bash]
+----
+python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
+----
+
+If `False`, check:
+
+* driver installation
+* container runtime configuration
+* that you started the devcontainer with `--gpus all` (see `.devcontainer/devcontainer.json`).
+
+== Image decode failures
+
+`torchvision.io.read_image` supports JPEG/PNG/GIF depending on build. Ensure your container has the required codec libs.

@@ -1,0 +1,38 @@
+= Development Guide
+:toc:
+
+== One-time setup
+
+[source,bash]
+----
+uv sync --group gpu
+----
+
+== Lint / format
+
+[source,bash]
+----
+uv run --group lint ruff check .
+uv run --group lint ruff format .
+----
+
+== Type check
+
+[source,bash]
+----
+uv run --group type pyright
+----
+
+== Tests
+
+Tests are repo-sanity checks and do not require CUDA.
+
+[source,bash]
+----
+uv run --group test pytest
+----
+
+== Updating dependencies
+
+* Update the GPU stack (torch/torchvision/triton) by editing `[dependency-groups].gpu`.
+* If you add an `uv.lock`, commit it and use `uv sync --locked` in CI for full reproducibility.

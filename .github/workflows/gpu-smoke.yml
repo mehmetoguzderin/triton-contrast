@@ -1,0 +1,34 @@
+name: gpu-smoke
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, linux, x64, gpu]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python (pinned)
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install all deps (including GPU)
+        run: uv sync --all-groups --no-install-project --compile-bytecode
+
+      - name: Generate an image
+        run: uv run --all-groups python scripts/gen_test_image.py --out ./frame.png --size 1024
+
+      - name: Run CLI (Michelson)
+        run: uv run --all-groups python triton_contrast_cli.py ./frame.png
+
+      - name: Run CLI (bench)
+        run: uv run --all-groups python triton_contrast_cli.py ./frame.png --bench --iters 20

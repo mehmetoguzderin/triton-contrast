@@ -1,0 +1,104 @@
+= Triton Contrast CLI (GPU)
+:toc:
+:toclevels: 3
+
+Single-pass Triton kernel computing Michelson (global min/max) and Weber (ROI) contrast from images using Torch/TorchVision I/O.
+
+== Requirements
+
+* Linux + NVIDIA GPU for execution.
+* If using the devcontainer, your host needs the NVIDIA driver + NVIDIA Container Toolkit so `--gpus all` works. (See NVIDIA docs for installation and verification.)
+
+== Quickstart (local)
+
+[source,bash]
+----
+# Install tooling + GPU deps into .venv
+uv sync --group gpu
+
+# Run exactly like your examples:
+uv run triton_contrast_cli.py ./frame.png
+----
+
+== Quickstart (Dev Container)
+
+This repo includes a GPU-enabled devcontainer. It uses:
+
+* Base image: `nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04`
+* `runArgs: ["--gpus","all"]` to expose GPUs to the container
+* `uv sync --all-groups` in `post-create.sh` (installs the `gpu` group too)
+
+Open in VS Code → "Dev Containers: Reopen in Container".
+
+== Usage
+
+=== Michelson only
+
+[source,bash]
+----
+uv run triton_contrast_cli.py ./frame.png
+----
+
+=== Weber + Michelson (ROI boxes)
+
+[source,bash]
+----
+uv run triton_contrast_cli.py ./frame.png \
+  --target 100,100,200,200 \
+  --background 0,0,80,80
+----
+
+=== Linearize sRGB before luminance (more physical)
+
+[source,bash]
+----
+uv run triton_contrast_cli.py ./frame.png --linearize-srgb
+----
+
+=== Batch multiple same-size images
+
+[source,bash]
+----
+uv run triton_contrast_cli.py ./a.jpg ./b.jpg ./c.jpg \
+  --target 10,10,120,120 --background 0,0,50,50
+----
+
+=== Quick perf sanity check
+
+[source,bash]
+----
+uv run triton_contrast_cli.py ./frame.png --bench --iters 50
+----
+
+== Dependency groups (uv)
+
+* Install dev tooling only:
+
+[source,bash]
+----
+uv sync
+----
+
+* Install GPU/runtime dependencies:
+
+[source,bash]
+----
+uv sync --group gpu
+----
+
+* Install everything (devcontainer does this):
+
+[source,bash]
+----
+uv sync --all-groups
+----
+
+The CUDA-enabled torch/torchvision wheels are pulled via a dedicated uv index and per-package source mapping.
+
+If you need CPU wheels, switch `[tool.uv.sources]` in `pyproject.toml` from `pytorch-cu126` to `pytorch-cpu`.
+
+== CI
+
+GitHub Actions runs lint/type/tests without installing GPU deps, using `--no-default-groups` and explicit groups.
+
+A separate `gpu-smoke` workflow is provided for self-hosted GPU runners.

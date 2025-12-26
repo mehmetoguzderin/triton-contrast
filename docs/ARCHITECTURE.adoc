@@ -1,0 +1,24 @@
+= Architecture
+:toc:
+
+== Overview
+
+The core is a single Triton kernel that:
+
+* Loads RGB as uint8/float
+* Optionally linearizes sRGB to linear light
+* Computes Rec.709 luminance
+* Reduces global min/max via atomics (Michelson)
+* Reduces target/background ROI sums+counts via atomics (Weber)
+
+The kernel is autotuned over multiple block shapes.
+
+== Determinism
+
+Atomic float reductions are not bitwise deterministic across runs due to varying execution order.
+
+== Performance notes
+
+* Batched same-size inputs share a single kernel launch.
+* CPU tensors are pinned before H2D transfer.
+* `--linearize-srgb` increases compute cost (log/exp).

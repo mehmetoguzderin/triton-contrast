@@ -1,0 +1,12 @@
+{
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": "none",
+  "reportMissingTypeStubs": "none",
+  "exclude": [
+    "**/.venv",
+    "**/.cache",
+    "**/build",
+    "**/dist"
+  ]
+}

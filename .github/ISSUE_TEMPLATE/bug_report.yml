@@ -1,0 +1,19 @@
+name: Bug report
+description: Something isn't working
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: Include CLI command(s) and expected vs actual output.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Paste output of `scripts/doctor.sh` (redact secrets).
+    validations:
+      required: true

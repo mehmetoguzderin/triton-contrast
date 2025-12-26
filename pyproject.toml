@@ -1,0 +1,117 @@
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[project]
+name = "triton-contrast"
+version = "0.1.0"
+description = "Triton + Torch GPU contrast metrics (Michelson + Weber) with CLI image loading."
+readme = "README.adoc"
+requires-python = ">=3.12,<3.14"
+license = { text = "CC0 1.0 Universal (CC0 1.0) License" }
+authors = [{ name = "Mehmet Oguz Derin" }]
+keywords = ["triton", "torch", "cuda", "gpu", "gpgpu", "contrast", "michelson", "weber"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Creative Commons Zero v1.0 Universal (CC0 1.0) License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
+# We keep runtime dependencies out of [project.dependencies] and instead in a PEP 735 group.
+# That keeps CI lightweight and lets devcontainer install the GPU group explicitly.
+dependencies = []
+
+[dependency-groups]
+# GPU/runtime deps (install locally with: uv sync --group gpu)
+gpu = [
+  # Use the PyTorch CUDA wheel index via [tool.uv.sources] below.
+  # Note: CUDA wheels often carry local versions like 2.7.0+cu126; specifiers like >= work well.
+  "torch>=2.7.0",
+  "torchvision>=0.22.0",
+  # Explicit triton dependency for your direct import.
+  # We avoid pinning to "latest" to reduce mismatch risk with torch's expectations.
+  "triton>=3.0",
+]
+
+# Developer UX
+dev = [
+  "ipython>=8.29.0",
+  "rich>=13.9.4",
+]
+
+# Quality gates
+lint = [
+  "ruff>=0.14.10",
+]
+type = [
+  "pyright>=1.1.407",
+]
+test = [
+  "pytest>=8.3.4",
+]
+
+[tool.uv]
+# Enforce a modern uv in devcontainer/CI.
+required-version = ">=0.9.18"
+# Script-only repo: don't try to install as a package.
+package = false
+# Default groups for fast iteration (GPU group is opt-in).
+default-groups = ["dev", "lint", "type", "test"]
+
+# Use the official PyTorch CUDA 12.6 wheel index for torch/torchvision.
+# (Switch to CPU by changing [tool.uv.sources] to pytorch-cpu.)
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
+torchvision = { index = "pytorch-cu126" }
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+respect-gitignore = true
+extend-exclude = [
+  ".venv",
+  ".cache",
+  "dist",
+  "build",
+]
+
+[tool.ruff.format]
+# Keep formatting stable and predictable.
+docstring-code-format = true
+
+[tool.ruff.lint]
+# Strong but practical defaults.
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "RUF"]
+# Global ignores (keep minimal)
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Your script is intentionally kept as-is; relax modernizer rules + a few style nits.
+"triton_contrast_cli.py" = [
+  "E501",  # line too long (allow for readability in this specific script)
+  "E731",  # assigns lambda to variable (grid = lambda ...)
+  "F841",  # "except Exception as e" but e unused
+  "F401",  # List import is unused
+  "B905",  # zip without explicit strict parameter
+  "SIM108", # simplify if-else to ternary (kept for readability)
+  "UP006", # typing.List vs list
+  "UP035", # typing.Tuple/Optional vs tuple/| (kept as-is)
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

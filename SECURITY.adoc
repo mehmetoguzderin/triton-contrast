@@ -1,0 +1,21 @@
+= Security Policy
+
+== Supported Versions
+
+Only the default branch is supported.
+
+== Reporting a Vulnerability
+
+Please open a GitHub Security Advisory (preferred) or contact the maintainers.
+
+Include:
+
+* impacted version/commit
+* minimal repro
+* expected vs actual behavior
+* any logs (redact secrets)
+
+== Supply Chain Notes
+
+* Devcontainer runs with GPU access (`--gpus all`). Treat the container as privileged with respect to GPU resources.
+* Prefer pinning `uv.lock` in production pipelines.

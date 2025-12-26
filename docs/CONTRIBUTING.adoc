@@ -1,0 +1,23 @@
+= Contributing
+:toc:
+
+== Workflow
+
+. Create a branch
+. Keep changes focused
+. Add/update docs in AsciiDoc
+. Ensure:
++
+[source,bash]
+----
+uv sync --group gpu
+uv run --group lint ruff check .
+uv run --group lint ruff format --check .
+uv run --group type pyright
+uv run --group test pytest
+----
+
+== Style
+
+* Prefer explicitness over cleverness in performance-critical GPU kernels.
+* Keep the public CLI stable; add flags rather than changing existing behavior.
